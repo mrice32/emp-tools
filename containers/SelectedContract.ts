@@ -4,23 +4,18 @@ import { useRouter } from "next/router";
 import { ethers } from "ethers";
 import ContractList, { ContractInfo } from "./ContractList";
 
-export type SelectedContractStateType = {
-  address: string | null;
-  contract: ContractInfo | null;
-  isValid: boolean;
-};
-
 function useSelectedContract() {
   const router = useRouter();
   const { getByAddress, loading } = ContractList.useContainer();
-  const [state, setState] = useState<SelectedContractStateType>({
-    address: null,
-    contract: null,
-    isValid: false,
-  });
+  const [state, setState] = useState<{
+    address: string | null;
+    contract: ContractInfo | null;
+    isValid: boolean;
+  }>({ address: null, contract: null, isValid: false });
 
   // this seeds the address based on URL query param. Should probably be its own hook.
   useEffect(() => {
+    // we need to wait until the contract list is loaded
     if (loading) return;
     const queryAddress = router.query.address;
     const isNewAddress = queryAddress !== state.address;
@@ -44,7 +39,6 @@ function useSelectedContract() {
 
   // Change our globally selected address.
   function setAddress(address: string | null) {
-    setState({ isValid: false, address: null, contract: null });
     let contract = null;
     if (address != null) {
       contract = getByAddress(address) || null;
